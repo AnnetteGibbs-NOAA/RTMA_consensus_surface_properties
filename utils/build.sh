@@ -24,15 +24,18 @@ v????.ncep.noaa.gov | m????.ncep.noaa.gov)
   module purge
   module use ../modulefiles
   module load build.wcoss_dell_p3.intel
-  module list
+  module list ;;
 
-  cmake .. -DCMAKE_INSTALL_PREFIX=../
+#---------------------------------------------------------------------------------
+# BUILD ON Hera
+#---------------------------------------------------------------------------------
 
-  make -j 1 VERBOSE=1
+h????)
 
-  make install
-
-  rc=$? ;;
+  module purge
+  module use ../modulefiles
+  module load build.hera.intel
+  module list ;;
 
 *)
 
@@ -40,5 +43,11 @@ v????.ncep.noaa.gov | m????.ncep.noaa.gov)
   exit  ;;
 
 esac
+
+cmake .. -DCMAKE_INSTALL_PREFIX=../
+
+make -j 1 VERBOSE=1
+
+make install
 
 exit
