@@ -258,6 +258,8 @@
 
  call baclose(lugb, iret)
 
+ print*,"NORMAL TERMINATION"
+
  stop
 
  end program fixit

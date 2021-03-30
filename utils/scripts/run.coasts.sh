@@ -5,23 +5,31 @@
 # cat run.lsf | bsub
 #-----------------------------------------------------
 
-#BSUB -oo log
-#BSUB -eo log
-#BSUB -q dev_shared
-#BSUB -R rusage[mem=1000]
+#BSUB -oo coasts.log
+#BSUB -eo coasts.log
+#BSUB -q debug
 #BSUB -R affinity[core(1)]
 #BSUB -J rmlakes
-#BSUB -P RTMA-T2O
-#BSUB -W 0:05
+#BSUB -P GFS-DEV
+#BSUB -W 0:02
 
 set -x
 
-mkdir -p /ptmpp1/George.Gayno/waterfalls
+module purge
+module use ../modulefiles
+module load build.wcoss_dell_p3.intel
+module list
 
-rundir=${LS_SUBCWD}
+run_dir=$PWD/..
 
-cd /ptmpp1/George.Gayno/waterfalls
+WORKDIR=/gpfs/dell1/stmp/$LOGNAME/coasts
+rm -fr $WORKDIR
+mkdir -p $WORKDIR
+cd $WORKDIR
 
-${rundir}/fix.exe
+ln -fs /gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/RTMA_consensus_surface_properties/conus_landwater_v2p5_fine.gb2  ./fort.50
+ln -fs /gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/RTMA_consensus_surface_properties/nam_smarttopoconus2p5.grb2  ./fort.51
+
+${run_dir}/exec/fix_coasts_conus.exe
 
 exit 0

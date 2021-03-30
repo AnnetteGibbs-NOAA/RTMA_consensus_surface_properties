@@ -1,8 +1,8 @@
  program test
 
-! read in a land mask in grib 2 format and remove small lakes
-! from it.  i use a modified version of the 'waterfall'
-! code from gridgen_sfc to do this.  works for conus nest
+! Read in a land mask in grib 2 format and remove small lakes
+! from it.  I used a modified version of the 'waterfall'
+! code from gridgen_sfc to do this.  Works for conus nest
 ! only.
 
  use grib_mod
@@ -76,39 +76,40 @@
  ie=imdl
  je=jmdl
 
-! the algorithm will compare the flag
+! The algorithm will compare the flag
 ! value at a water point with the flag values at 
-! all neighboring water points.  if the flag value
+! all neighboring water points.  If the flag value
 ! is smaller than one of its neighbors, the flag
 ! value at that water point is set to the larger
-! value of its neighbor.  this process is repeated
+! value of its neighbor.  This process is repeated
 ! until the flag values are uniform within 
 ! an enclosed water body.  
 !
-! here, set the flag value to one for the entire
+! Here, set the flag value to one for the entire
 ! grid.  set some seed flag values to three for
-! water bodies we want to keep.  here, those
+! water bodies we want to keep.  Here, those
 ! bodies are the ocean.
 
  flag=1
  flag(200,290)=3  ! pac ocean
  flag(50,1200)=3  ! pac ocean
  flag(600,10)=3   ! pac ocean
-!flag(690,855)=3  ! great salt lake
+ flag(690,855)=3  ! great salt lake - main lake
+ flag(701,850)=3   ! great salt lake - small adjacent lake to
+                   ! south east
  flag(1300,100)=3  ! gulf of mex
  flag(2000,300)=3  ! atl ocean
  flag(2200,900)=3  ! atl ocean
  flag(2300,1250)=3  ! atl ocean
-!flag(1700,1500)=3  ! hudson bay
+ flag(1700,1500)=3  ! hudson bay
  flag(1550,1100)=3  ! lake superior
  flag(1550,900)=3  ! lakes michigan and huron
  flag(1750,900)=3  ! lake erie
  flag(1850,965)=3  ! lake ontario
- flag(1705,900)=3  ! lake saint clair
-!flag(524,525)=3   ! salton sea
-!flag(690,850)=3   ! great salt lake
-!flag(1840,220)=3  ! lake okeechobee
-!flag(1200,1380)=3  ! lake winnipeg
+!flag(1705,900)=3  ! lake saint clair
+ flag(524,525)=3   ! salton sea
+ flag(1840,220)=3  ! lake okeechobee
+ flag(1200,1380)=3  ! lake winnipeg
  flag(1800,1)=3  ! cuba
 
 ! Retain Detroit river so lake erie and lake st.
@@ -120,7 +121,7 @@
 ! Create land bridge so logic removes upper portions
 ! of the Saint Lawrence River. 
 
- mask(2150:2220,1300) =  1
+!mask(2150:2220,1300) =  1
 
  call lakes(mask,flag,imdl,jmdl,is,ie,js,je)
 
@@ -155,6 +156,8 @@
  end if
 
  call baclose(lugb, iret)
+
+ print*,'normal termination'
 
  stop
 
