@@ -103,7 +103,11 @@
  allocate (orog(imdl,jmdl))
  orog = reshape (gfld_orog%fld, (/imdl,jmdl/) )
 
- call qc_data(mask, orog, imdl, jmdl)
+ if (imdl == 1649 .and. jmdl == 1105) then
+   call qc_data_alaska(mask, orog, imdl, jmdl)
+ else
+   call qc_data(mask, orog, imdl, jmdl)
+ endif
 
  do k = 1, 5000
    print*,'k is ',k
@@ -238,6 +242,49 @@
  stop
 
  end program fix_coasts
+
+ subroutine qc_data_alaska(mask, orog, imdl, jmdl)
+
+ implicit none
+
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(inout) :: mask(imdl,jmdl)
+ integer :: i, j
+
+ real(kind=8), intent(inout) :: orog(imdl,jmdl)
+
+ print*,"- QC DATA FOR ALASKA."
+
+! Remove bad ocean points and land points that were
+! below sea level.
+
+ do j = 1, jmdl
+ do i = 1, imdl
+   if (orog(i,j) < 0.0) then
+     if (mask(i,j) == 0) then
+       print*,'- LOW WATER POINT ',i,j,orog(i,j)
+       orog(i,j) = 0.0
+     else
+       print*,'- LOW LAND POINT ',i,j,orog(i,j)
+       orog(i,j) = 1.0
+     endif
+   endif
+ enddo
+ enddo
+
+! Remove some low (150 m) points in Great Slave lake.
+! The wikipedia reported value is 157 m above sea level.
+
+ do j = 750, 762
+ do i = 1450, 1465
+   if (mask(i,j) == 0 .and. orog(i,j) < 157.0) then
+     print*,'- BAD LAKE ',i,j,orog(i,j)
+     orog(i,j) = 157.0
+   endif
+ enddo
+ enddo
+
+ end subroutine qc_data_alaska
 
  subroutine qc_data(mask, orog, imdl, jmdl)
 
