@@ -41,6 +41,6 @@ cd $WORKDIR
 #ln -fs /gpfs/dell1/nco/ops/nwprod/smartinit.v4.3.0/fix/mask/nam_smartmaskpr2p5.grb2  ./fort.50
 ln -fs /gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/RTMA_consensus_surface_properties/conus_landwater_v2p5_fine.gb2  ./fort.50
 
-$run_dir/../exec/nolakes_conus.exe
+$run_dir/../exec/nolakes.exe
 
 exit 0
