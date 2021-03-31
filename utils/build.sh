@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #---------------------------------------------------------------------------------
-# BUILD UTILITY PROGRAMS.
+# BUILD UTILITY PROGRAMS.  Invoke this script with no arguments.
 #---------------------------------------------------------------------------------
 
 mac=$(hostname -f)

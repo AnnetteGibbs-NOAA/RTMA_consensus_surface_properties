@@ -1,9 +1,13 @@
  program test
 
+!--------------------------------------------------------------
 ! Read in a land mask in grib 2 format and remove small lakes
-! from it.  I used a modified version of the 'waterfall'
-! code from gridgen_sfc to do this.  Works for conus nest
-! only.
+! from it. Only works for the Alaska, Hawaii, Puerto Rico
+! and CONUS RTMA grids.
+!
+! The input grib2 file with all lakes is linked to Fortran
+! unit number 50.
+!--------------------------------------------------------------
 
  use grib_mod
 
@@ -13,15 +17,20 @@
 
  integer :: i, j, k, imdl, jmdl, lugb, lugi, iret
  integer :: is, ie, js, je
- integer(kind=1), allocatable :: mask(:,:), flag(:,:)
  integer :: jdisc, jgdtn, jpdtn
  integer :: jids(200), jgdt(200), jpdt(200)
+ integer(kind=1), allocatable :: flag(:,:)
+ integer(kind=1), allocatable :: mask(:,:)
 
  logical :: unpack
 
  real(kind=8),allocatable :: dummy(:,:)
 
  type(gribfield) :: gfld
+
+!--------------------------------------------------------------
+! Open and read the grib2 file with all lakes.
+!--------------------------------------------------------------
 
  lugb = 50
  fngrib = "./fort.50"
@@ -76,7 +85,8 @@
  ie=imdl
  je=jmdl
 
-! The algorithm will compare the flag
+!--------------------------------------------------------------
+! The lake removal algorithm works by comparing a flag
 ! value at a water point with the flag values at 
 ! all neighboring water points.  If the flag value
 ! is smaller than one of its neighbors, the flag
@@ -85,10 +95,187 @@
 ! until the flag values are uniform within 
 ! an enclosed water body.  
 !
+! The flag values for each grid are set by the following
+! routines.
+!--------------------------------------------------------------
+
+ if (imdl == 2345 .and. jmdl == 1597) then
+   call set_flags_conus(flag, mask, imdl, jmdl)
+ elseif (imdl == 1649 .and. jmdl == 1105) then
+   call set_flags_alaska(flag, imdl, jmdl)
+ elseif (imdl == 321 .and. jmdl == 225) then
+   call set_flags_hawaii(flag, imdl, jmdl)
+ elseif (imdl == 353 .and. jmdl == 257) then
+   call set_flags_prico_1p25(flag, imdl, jmdl)
+ elseif (imdl == 177 .and. jmdl == 129) then
+   call set_flags_prico_2p5(flag, imdl, jmdl)
+ else
+   print*,"UNRECOGNIZED GRID. STOP."
+   stop 3
+ endif
+
+!--------------------------------------------------------------
+! Remove small lakes.
+!--------------------------------------------------------------
+
+ call lakes(mask,flag,imdl,jmdl,is,ie,js,je)
+
+!--------------------------------------------------------------
+! Convert the flag values to landmask values.
+! The flag values are: 1-not water, 3-water.
+! The landmask values are: 0-water, 1-not water.
+!--------------------------------------------------------------
+
+ do j=js,je
+ do i=is,ie
+   if(flag(i,j) == 3)then
+    dummy(i,j) = 0.0
+   else
+    dummy(i,j) = 1.0
+   endif
+ enddo
+ enddo
+
+!--------------------------------------------------------------
+! Write the 'no lake' grib2 file.
+!--------------------------------------------------------------
+
+ lugb = 48
+ fngrib = "./nolakes.gb2"
+ call baopenw(lugb,fngrib,iret)
+ if (iret /= 0) then
+   print*,'- BAD OPEN, IRET IS ', iret
+   stop 5
+ end if
+
+ gfld%fld=reshape(dummy,(/imdl*jmdl/))
+ call putgb2(lugb,gfld,iret)
+
+ if (iret /= 0) then
+   print*,'- BAD WRITE, IRET IS ', iret
+   stop 6
+ end if
+
+ call baclose(lugb, iret)
+
+ print*,'- NORMAL TERMINATION'
+
+ stop
+
+ end program test
+
+ subroutine set_flags_prico_1p25(flag,imdl,jmdl)
+
+!--------------------------------------------------------------
+! Set flag values for the 1.25 km Puerto Rico grid.
+!
 ! Here, set the flag value to one for the entire
-! grid.  set some seed flag values to three for
-! water bodies we want to keep.  Here, those
-! bodies are the ocean.
+! grid. Then, set some seed flag values to three for
+! water bodies we want to keep.
+!--------------------------------------------------------------
+
+ implicit none
+ 
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(out) :: flag(imdl,jmdl)
+
+ print*,"- SET FLAGS FOR 1.25 KM PUERTO RICO GRID."
+
+ flag=1
+ flag(20,20)=3  ! Atlantic ocean
+
+ end subroutine set_flags_prico_1p25
+
+ subroutine set_flags_prico_2p5(flag,imdl,jmdl)
+
+!--------------------------------------------------------------
+! Set flag values for the 2.5 km Puerto Rico grid.
+!
+! Here, set the flag value to one for the entire
+! grid. Then, set some seed flag values to three for
+! water bodies we want to keep.
+!--------------------------------------------------------------
+
+ implicit none
+ 
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(out) :: flag(imdl,jmdl)
+
+ print*,"- SET FLAGS FOR 2.5 KM PUERTO RICO GRID."
+
+ flag=1
+ flag(20,20)=3  ! Atlantic ocean
+
+ end subroutine set_flags_prico_2p5
+
+ subroutine set_flags_hawaii(flag,imdl,jmdl)
+
+!--------------------------------------------------------------
+! Set flag values for the Hawaii grid.
+!
+! Here, set the flag value to one for the entire
+! grid. Then, set some seed flag values to three for
+! water bodies we want to keep.
+!--------------------------------------------------------------
+
+ implicit none
+ 
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(out) :: flag(imdl,jmdl)
+
+ print*,"- SET FLAGS FOR HAWAII GRID."
+
+ flag=1
+ flag(20,20)=3  ! pac ocean
+
+ end subroutine set_flags_hawaii
+
+ subroutine set_flags_alaska(flag,imdl,jmdl)
+
+!--------------------------------------------------------------
+! Set flag values for the Alaska grid.
+!
+! Here, set the flag value to one for the entire
+! grid. Then, set some seed flag values to three for
+! water bodies we want to keep.
+!--------------------------------------------------------------
+
+ implicit none
+ 
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(out) :: flag(imdl,jmdl)
+
+ print*,"- SET FLAGS FOR ALASKA GRID."
+
+ flag=1
+ flag(800,100)=3  ! pac ocean
+ flag(200,600)=3  ! pac ocean
+ flag(800,1000)=3 ! arctic ocean
+ flag(50,950) = 3 ! kamchatka
+
+ end subroutine set_flags_alaska
+
+ subroutine set_flags_conus(flag,mask,imdl,jmdl)
+
+!--------------------------------------------------------------
+! Set flag values for the CONUS grid.
+!
+! Here, set the flag value to one for the entire
+! grid. Then, set some seed flag values to three for
+! water bodies we want to keep.
+!
+! To get it work, there were situations where the mask
+! had to be changed as well, to either add or remove
+! connections between water bodies.
+!--------------------------------------------------------------
+
+ implicit none
+ 
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(inout) :: mask(imdl,jmdl)
+ integer(kind=1), intent(out) :: flag(imdl,jmdl)
+
+ print*,"- SET FLAGS FOR CONUS GRID."
 
  flag=1
  flag(200,290)=3  ! pac ocean
@@ -112,58 +299,28 @@
  flag(1200,1380)=3  ! lake winnipeg
  flag(1800,1)=3  ! cuba
 
+!--------------------------------------------------------------
 ! Retain Detroit river so lake erie and lake st.
 ! clair are connected.
+!--------------------------------------------------------------
 
 !mask(1695,893) = 0
 !mask(1693,887) = 0
 
+!--------------------------------------------------------------
 ! Create land bridge so logic removes upper portions
 ! of the Saint Lawrence River. 
+!--------------------------------------------------------------
 
 !mask(2150:2220,1300) =  1
 
- call lakes(mask,flag,imdl,jmdl,is,ie,js,je)
-
-! convert the flag values to landmask values.
-! the flag values are: 1-not water, 3-water.
-! the landmask values are: 0-water, 1-not water.
-
- do j=js,je
- do i=is,ie
-   if(flag(i,j) == 3)then
-    dummy(i,j) = 0.0
-   else
-    dummy(i,j) = 1.0
-   endif
- enddo
- enddo
-
- lugb = 48
- fngrib = "./nolakes.gb2"
- call baopenw(lugb,fngrib,iret)
- if (iret /= 0) then
-   print*,'- BAD OPEN, IRET IS ', iret
-   stop 5
- end if
-
- gfld%fld=reshape(dummy,(/imdl*jmdl/))
- call putgb2(lugb,gfld,iret)
-
- if (iret /= 0) then
-   print*,'- BAD WRITE, IRET IS ', iret
-   stop 6
- end if
-
- call baclose(lugb, iret)
-
- print*,'normal termination'
-
- stop
-
- end program test
+ end subroutine set_flags_conus
 
  subroutine lakes(mask,flag,imdl,jmdl,is,ie,js,je)
+
+!--------------------------------------------------------------
+! Remove lakes.
+!--------------------------------------------------------------
 
  implicit none
 
