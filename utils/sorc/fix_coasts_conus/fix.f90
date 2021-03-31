@@ -1,4 +1,4 @@
- program fixit
+ program fix_coasts
 
 ! adjust the terrain provided by raytheon using my "waterfall" logic
 
@@ -103,32 +103,7 @@
  allocate (orog(imdl,jmdl))
  orog = reshape (gfld_orog%fld, (/imdl,jmdl/) )
 
-! CONUS GRID ONLY!!
-! Reset mask to remove a river between lake superior and the other
-! great lakes.   This point had a low elevation that was
-! influencing the entire lake superior.  Also reset a point
-! in Georgian Bay with a low elevation that was affecting
-! Huron and Michigan.
-
- if (imdl == 2345 .and. jmdl == 1597) then ! is this the conus grid?
-   mask(1630:1636,1078:1086)=1  ! Superior 
-   mask(1793:1798,1013:1018)=1  ! Georgian Bay
- endif
-
-! some ocean points had elevations below sea level which
-! caused problems with the 'waterfall' logic.  Reset
-! these, but be careful to retain the salton sea, which
-! is minus 69 meters.
-
- do j = 1, jmdl
- do i = 1, imdl
-   if (mask(i,j)==0 .and. orog(i,j) < 0.0) then
-     if (orog(i,j) < -20.) cycle   ! salton sea
-     print*,'low water ',i,j,orog(i,j)
-     orog(i,j)=0.0
-   endif
- enddo
- enddo
+ call qc_data(mask, orog, imdl, jmdl)
 
  do k = 1, 5000
    print*,'k is ',k
@@ -262,7 +237,49 @@
 
  stop
 
- end program fixit
+ end program fix_coasts
+
+ subroutine qc_data(mask, orog, imdl, jmdl)
+
+ implicit none
+
+ integer, intent(in) :: imdl, jmdl
+ integer(kind=1), intent(inout) :: mask(imdl,jmdl)
+ integer :: i, j
+
+ real(kind=8), intent(inout) :: orog(imdl,jmdl)
+
+ print*,"- QC MASK AND OROG."
+
+! CONUS GRID ONLY!!
+! Reset mask to remove a river between Lake Superior and the other
+! Great Lakes. This point had a low elevation that was
+! influencing the entire Lake Superior.  Also reset a point
+! in Georgian Bay with a low elevation that was affecting
+! Huron and Michigan.
+
+ if (imdl == 2345 .and. jmdl == 1597) then ! is this the conus grid?
+   print*,"- THIS IS A CONUS GRID."
+   mask(1630:1636,1078:1086)=1  ! Superior 
+   mask(1793:1798,1013:1018)=1  ! Georgian Bay
+ endif
+
+! Some ocean points had elevations below sea level which
+! caused problems with the 'waterfall' logic.  Reset
+! these, but be careful to retain the Salton Sea, which
+! is minus 69 meters.
+
+ do j = 1, jmdl
+ do i = 1, imdl
+   if (mask(i,j)==0 .and. orog(i,j) < 0.0) then
+     if (orog(i,j) < -20.) cycle   ! salton sea
+     print*,'- LOW WATER ',i,j,orog(i,j)
+     orog(i,j)=0.0
+   endif
+ enddo
+ enddo
+
+ end subroutine qc_data
 
  subroutine grib2_null(gfld)
 
