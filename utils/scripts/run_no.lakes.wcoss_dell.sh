@@ -35,10 +35,6 @@ cd $WORKDIR
 # Link to the input file with all lakes.
 #------------------------------------------------------------------
 
-#ln -fs /gpfs/dell1/nco/ops/nwprod/smartinit.v4.3.0/fix/mask/nam_smartmaskak3.grb2  ./fort.50
-#ln -fs /gpfs/dell1/nco/ops/nwprod/smartinit.v4.3.0/fix/mask/nam_smartmaskhi.grb2  ./fort.50
-#ln -fs /gpfs/dell1/nco/ops/nwprod/smartinit.v4.3.0/fix/mask/nam_smartmaskpr1p25.grb2  ./fort.50
-#ln -fs /gpfs/dell1/nco/ops/nwprod/smartinit.v4.3.0/fix/mask/nam_smartmaskpr2p5.grb2  ./fort.50
 ln -fs /gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/RTMA_consensus_surface_properties/conus_landwater_v2p5_fine.gb2  ./fort.50
 
 $run_dir/../exec/nolakes.exe
