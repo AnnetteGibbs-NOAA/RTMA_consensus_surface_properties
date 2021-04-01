@@ -9,7 +9,7 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -check bounds")
 endif()
 
-set(exe_name fix_coasts_alaska.exe)
+set(exe_name fix_coasts.exe)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}
