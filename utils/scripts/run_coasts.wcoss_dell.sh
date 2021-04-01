@@ -39,8 +39,6 @@ cd $WORKDIR
 # fort.51.
 #-----------------------------------------------------
 
-#ln -fs /gpfs/dell1/stmp/George.Gayno/fix.mask.cats/alaska_landwater_urma.gb2  ./fort.50
-#ln -fs /gpfs/dell1/stmp/George.Gayno/fix.mask.cats/alaska_terrain.v2p0.gb2  ./fort.51
 ln -fs /gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/RTMA_consensus_surface_properties/conus_landwater_v2p5_fine.gb2  ./fort.50
 ln -fs /gpfs/dell2/emc/modeling/noscrub/Annette.Gibbs/RTMA_consensus_surface_properties/nam_smarttopoconus2p5.grb2  ./fort.51
 
