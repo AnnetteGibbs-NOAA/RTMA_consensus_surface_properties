@@ -3,7 +3,7 @@
 # George Gayno
 
 set(fortran_src
-    fix.f90)
+    fix_coasts.f90)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -check bounds")
