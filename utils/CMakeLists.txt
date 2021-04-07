@@ -27,7 +27,6 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -r8 -check -check noarg_temp_created -check nopointer -fp-stack-check -fstack-protector-all -fpe0 -debug -ftrapuv")
 endif()
 
-find_package(w3nco REQUIRED)
 find_package(bacio REQUIRED)
 find_package(g2 REQUIRED)
 

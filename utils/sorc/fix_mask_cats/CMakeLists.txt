@@ -3,13 +3,13 @@
 # George Gayno
 
 set(fortran_src
-    nolakes.f90)
+    fix_mask_cats.f90)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -check bounds")
 endif()
 
-set(exe_name nolakes.exe)
+set(exe_name fix_mask_cats.exe)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}
